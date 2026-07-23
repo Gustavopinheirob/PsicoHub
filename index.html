@@ -1,0 +1,794 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PsicoHub — Prontuário offline e criptografado para psicólogos</title>
+<meta name="description" content="Prontuário, agenda e financeiro num app 100% offline, criptografado e sem mensalidade. Software de gestão para psicólogas e psicólogos.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Ctext%20y='.9em'%20font-size='90'%3E%F0%9F%9B%A1%EF%B8%8F%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+<style>
+  :root {
+    /* Marca — violeta/roxo */
+    --violet-50: #f6f4ff;
+    --violet-100: #ede9fe;
+    --violet-200: #ddd6fe;
+    --violet-300: #c4b5fd;
+    --violet-400: #a78bfa;
+    --violet-500: #8b5cf6;
+    --violet-600: #7c3aed;
+    --violet-700: #6d28d9;
+    --violet-900: #3b1e78;
+    --violet-950: #23124d;
+    --indigo: #6366f1;
+    --emerald: #10b981;
+
+    /* Tokens de tema (claro) */
+    --bg: #ffffff;
+    --bg-soft: #f7f5ff;
+    --fg: #191427;
+    --fg-muted: #6b6588;
+    --card: #ffffff;
+    --border: #ece8f7;
+    --ring: rgba(124, 58, 237, 0.35);
+
+    /* Neutros do "app" nos mockups (iguais ao produto) */
+    --app-bg: #f6f7f9;
+    --app-card: #ffffff;
+    --app-fg: #0f172a;
+    --app-muted-fg: #64748b;
+    --app-muted: #eef1f5;
+    --app-border: #e2e8f0;
+    --app-primary: #4f46e5;
+
+    --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --serif: ui-serif, Georgia, "Times New Roman", serif;
+    --maxw: 1160px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #100b1c;
+      --bg-soft: #160f27;
+      --fg: #efeafc;
+      --fg-muted: #a79fc4;
+      --card: #191228;
+      --border: #271d3f;
+      --ring: rgba(167, 139, 250, 0.5);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #100b1c;
+    --bg-soft: #160f27;
+    --fg: #efeafc;
+    --fg-muted: #a79fc4;
+    --card: #191228;
+    --border: #271d3f;
+    --ring: rgba(167, 139, 250, 0.5);
+  }
+  :root[data-theme="light"] {
+    --bg: #ffffff;
+    --bg-soft: #f7f5ff;
+    --fg: #191427;
+    --fg-muted: #6b6588;
+    --card: #ffffff;
+    --border: #ece8f7;
+    --ring: rgba(124, 58, 237, 0.35);
+  }
+
+  * { box-sizing: border-box; }
+  .lp {
+    margin: 0;
+    font-family: var(--font);
+    color: var(--fg);
+    background: var(--bg);
+    line-height: 1.6;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  .lp img { max-width: 100%; }
+  .wrap { width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+
+  a { color: inherit; text-decoration: none; }
+  h1, h2, h3 { text-wrap: balance; letter-spacing: -0.02em; margin: 0; line-height: 1.08; }
+  p { margin: 0; }
+
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--violet-600);
+  }
+  @media (prefers-color-scheme: dark) { .eyebrow { color: var(--violet-400); } }
+  :root[data-theme="dark"] .eyebrow { color: var(--violet-400); }
+  :root[data-theme="light"] .eyebrow { color: var(--violet-600); }
+
+  .grad-text {
+    background: linear-gradient(100deg, var(--violet-400), var(--violet-600) 45%, var(--indigo));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .serif-accent { font-family: var(--serif); font-style: italic; font-weight: 500; }
+
+  /* Botões */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+    padding: 15px 26px; border-radius: 14px; font-weight: 700; font-size: 16px;
+    cursor: pointer; border: 1px solid transparent; transition: transform .18s ease, box-shadow .25s ease, background .2s;
+    white-space: nowrap;
+  }
+  .btn:focus-visible { outline: none; box-shadow: 0 0 0 4px var(--ring); }
+  .btn-primary {
+    color: #fff;
+    background: linear-gradient(135deg, var(--violet-500), var(--violet-700));
+    box-shadow: 0 10px 30px -8px rgba(124,58,237,.6);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 16px 40px -8px rgba(124,58,237,.7); }
+  .btn-ghost { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.25); color: #fff; }
+  .btn-ghost:hover { background: rgba(255,255,255,.16); transform: translateY(-2px); }
+  .btn-light { background: var(--card); color: var(--fg); border-color: var(--border); }
+  .btn-light:hover { transform: translateY(-2px); box-shadow: 0 12px 30px -12px rgba(124,58,237,.4); }
+
+  /* Nav */
+  .nav {
+    position: sticky; top: 0; z-index: 50;
+    backdrop-filter: saturate(160%) blur(14px);
+    background: color-mix(in srgb, var(--bg) 78%, transparent);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-in { display: flex; align-items: center; justify-content: space-between; height: 70px; }
+  .brand { display: flex; align-items: center; gap: 12px; font-weight: 800; font-size: 20px; letter-spacing: -0.02em; }
+  .brand-mark {
+    width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center;
+    background: linear-gradient(140deg, var(--violet-500), var(--violet-700));
+    box-shadow: 0 6px 18px -6px rgba(124,58,237,.7);
+  }
+  .nav-links { display: flex; align-items: center; gap: 28px; }
+  .nav-links a.muted { color: var(--fg-muted); font-weight: 600; font-size: 15px; }
+  .nav-links a.muted:hover { color: var(--fg); }
+  @media (max-width: 820px) { .nav-links .muted { display: none; } }
+
+  /* HERO */
+  .hero {
+    position: relative; overflow: hidden;
+    background:
+      radial-gradient(1200px 600px at 78% -8%, rgba(124,58,237,.55), transparent 60%),
+      radial-gradient(900px 500px at 8% 15%, rgba(99,102,241,.4), transparent 55%),
+      linear-gradient(180deg, var(--violet-950), #17102f 70%, var(--bg));
+    color: #fff;
+    padding: 92px 0 120px;
+  }
+  .orb { position: absolute; border-radius: 50%; filter: blur(60px); opacity: .55; pointer-events: none; }
+  .orb1 { width: 420px; height: 420px; background: #7c3aed; top: -80px; right: 6%; animation: float1 14s ease-in-out infinite; }
+  .orb2 { width: 340px; height: 340px; background: #6366f1; bottom: -60px; left: -40px; animation: float2 18s ease-in-out infinite; }
+  .orb3 { width: 260px; height: 260px; background: #a855f7; top: 40%; left: 44%; opacity: .35; animation: float1 20s ease-in-out infinite reverse; }
+  @keyframes float1 { 0%,100% { transform: translate(0,0) scale(1);} 50% { transform: translate(-30px,40px) scale(1.08);} }
+  @keyframes float2 { 0%,100% { transform: translate(0,0) scale(1);} 50% { transform: translate(40px,-30px) scale(1.1);} }
+
+  .hero-grid { position: relative; display: grid; grid-template-columns: 1.05fr 1fr; gap: 56px; align-items: center; }
+  @media (max-width: 940px) { .hero-grid { grid-template-columns: 1fr; gap: 44px; } }
+
+  .hero h1 { font-size: clamp(38px, 6vw, 62px); font-weight: 800; }
+  .hero h1 .light { font-weight: 300; color: #d9d2f5; }
+  .hero-sub { margin-top: 22px; font-size: clamp(17px, 2.3vw, 20px); color: #cfc7ec; max-width: 40ch; }
+  .hero-cta { margin-top: 34px; display: flex; flex-wrap: wrap; gap: 14px; }
+  .hero-trust { margin-top: 30px; display: flex; flex-wrap: wrap; gap: 18px 26px; }
+  .hero-trust span { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: #d9d2f5; font-weight: 600; }
+  .hero-trust svg { color: #a78bfa; }
+
+  /* Chips de pílula do topo */
+  .pill {
+    display:inline-flex; align-items:center; gap:9px; padding:8px 15px; border-radius:999px;
+    background: rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.2);
+    font-size:13px; font-weight:700; letter-spacing:.02em; color:#efeafc; margin-bottom:26px;
+  }
+  .pill .dot { width:8px; height:8px; border-radius:50%; background: var(--emerald); box-shadow:0 0 0 4px rgba(16,185,129,.25); }
+
+  /* ---- Mockups do app (fiéis ao produto) ---- */
+  .window {
+    border-radius: 16px; overflow: hidden; background: var(--app-card);
+    box-shadow: 0 40px 90px -30px rgba(20,10,50,.7), 0 0 0 1px rgba(255,255,255,.06);
+  }
+  .window-bar { display: flex; align-items: center; gap: 7px; padding: 11px 14px; background: #efe9fb; border-bottom: 1px solid #e4dcf5; }
+  .window-bar .d { width: 11px; height: 11px; border-radius: 50%; }
+  .window-bar .d1 { background: #ff5f57; } .window-bar .d2 { background: #febc2e; } .window-bar .d3 { background: #28c840; }
+  .window-bar .u { margin-left: 12px; font-size: 12px; color: #8b83a3; font-weight: 600; }
+
+  .app { display: grid; grid-template-columns: 168px 1fr; background: var(--app-bg); color: var(--app-fg); font-size: 13px; min-height: 340px; }
+  .app-side { background: var(--app-card); border-right: 1px solid var(--app-border); padding: 14px 10px; display: flex; flex-direction: column; gap: 3px; }
+  .app-logo { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 14px; padding: 4px 8px 12px; }
+  .app-logo .m { width: 24px; height: 24px; border-radius: 7px; background: linear-gradient(140deg, var(--violet-500), var(--violet-700)); display:grid; place-items:center; }
+  .app-nav { display: flex; align-items: center; gap: 9px; padding: 8px 10px; border-radius: 8px; color: #475569; font-weight: 600; }
+  .app-nav.active { background: var(--app-primary); color: #fff; }
+  .app-nav svg { width: 15px; height: 15px; }
+  .app-main { padding: 20px; }
+  .app-h { font-size: 19px; font-weight: 800; letter-spacing: -0.02em; }
+  .app-date { font-size: 11px; color: var(--app-muted-fg); text-transform: capitalize; margin-bottom: 3px; }
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; margin-top: 16px; }
+  .stat { background: var(--app-card); border: 1px solid var(--app-border); border-radius: 11px; padding: 13px; display: flex; gap: 11px; align-items: center; }
+  .stat .ic { width: 34px; height: 34px; border-radius: 9px; background: var(--app-muted); display: grid; place-items: center; color: var(--app-primary); flex: none; }
+  .stat .ic svg { width: 17px; height: 17px; }
+  .stat .lbl { font-size: 11px; color: var(--app-muted-fg); }
+  .stat .val { font-size: 20px; font-weight: 800; letter-spacing: -0.02em; }
+  .stat .val.sm { font-size: 17px; }
+
+  .card-lite { background: var(--app-card); border: 1px solid var(--app-border); border-radius: 11px; padding: 14px; }
+  .row-item { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--app-border); }
+  .row-item:last-child { border-bottom: 0; }
+  .avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--app-muted); display: grid; place-items: center; font-weight: 700; color: var(--app-primary); font-size: 12px; flex: none; }
+  .badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+  .badge.paid { background: #d1fae5; color: #047857; }
+  .badge.pend { background: #eef1f5; color: #64748b; }
+
+  /* timeline (prontuário) */
+  .tl { border-left: 2px solid var(--app-border); margin-left: 6px; padding-left: 16px; display: flex; flex-direction: column; gap: 11px; }
+  .tl-item { position: relative; background: var(--app-card); border: 1px solid var(--app-border); border-radius: 10px; padding: 12px; }
+  .tl-item::before { content: ""; position: absolute; left: -23px; top: 14px; width: 10px; height: 10px; border-radius: 50%; background: var(--app-primary); box-shadow: 0 0 0 3px var(--app-bg); }
+  .tl-badge { display:inline-block; font-size:10px; font-weight:700; padding:2px 9px; border-radius:999px; background: var(--app-primary); color:#fff; }
+  .tl-badge.alt { background: #0d9488; }
+
+  /* agenda mini */
+  .wk { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
+  .wk-col { background: var(--app-card); border: 1px solid var(--app-border); border-radius: 10px; overflow: hidden; }
+  .wk-head { padding: 8px 10px; border-bottom: 1px solid var(--app-border); }
+  .wk-head .dow { font-size: 9px; text-transform: uppercase; color: var(--app-muted-fg); font-weight: 700; }
+  .wk-head .num { font-size: 15px; font-weight: 800; }
+  .wk-head .num.today { color: var(--app-primary); }
+  .wk-body { padding: 8px; display: flex; flex-direction: column; gap: 6px; min-height: 92px; }
+  .evt { border-left: 3px solid var(--app-primary); background: var(--app-muted); border-radius: 6px; padding: 6px 8px; font-size: 10px; font-weight: 600; }
+  .evt.green { border-color: #0d9488; }
+
+  /* Sections */
+  section { position: relative; }
+  .band { padding: 96px 0; }
+  .band.soft { background: var(--bg-soft); }
+  .sec-head { max-width: 640px; margin: 0 auto 56px; text-align: center; }
+  .sec-head h2 { font-size: clamp(30px, 4.6vw, 46px); font-weight: 800; margin-top: 14px; }
+  .sec-head p { margin-top: 16px; color: var(--fg-muted); font-size: 18px; }
+
+  /* Pain cards */
+  .pain-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  @media (max-width: 900px) { .pain-grid { grid-template-columns: 1fr; } }
+  .pain {
+    background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 26px;
+    transition: transform .25s ease, box-shadow .25s ease, border-color .25s;
+  }
+  .pain:hover { transform: translateY(-4px); box-shadow: 0 24px 50px -30px rgba(124,58,237,.5); border-color: var(--violet-300); }
+  .pain .ix { width: 46px; height: 46px; border-radius: 12px; display: grid; place-items: center; margin-bottom: 16px;
+    background: linear-gradient(140deg, var(--violet-100), var(--violet-200)); color: var(--violet-700); }
+  :root[data-theme="dark"] .pain .ix, .lp .pain .ix { }
+  @media (prefers-color-scheme: dark) { .pain .ix { background: rgba(124,58,237,.18); color: var(--violet-300); } }
+  :root[data-theme="dark"] .pain .ix { background: rgba(124,58,237,.18); color: var(--violet-300); }
+  :root[data-theme="light"] .pain .ix { background: linear-gradient(140deg, var(--violet-100), var(--violet-200)); color: var(--violet-700); }
+  .pain h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+  .pain p { color: var(--fg-muted); font-size: 15px; }
+
+  /* Features bento */
+  .feat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  @media (max-width: 900px) { .feat-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .feat-grid { grid-template-columns: 1fr; } }
+  .feat { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 22px; transition: transform .22s, border-color .22s; }
+  .feat:hover { transform: translateY(-4px); border-color: var(--violet-300); }
+  .feat .fi { width: 42px; height: 42px; border-radius: 11px; background: var(--violet-600); color: #fff; display: grid; place-items: center; margin-bottom: 14px; }
+  .feat h3 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+  .feat p { color: var(--fg-muted); font-size: 14px; }
+  .feat.wide { grid-column: span 2; }
+  @media (max-width: 560px) { .feat.wide { grid-column: span 1; } }
+
+  /* Showcase rows */
+  .show-row { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; }
+  .show-row + .show-row { margin-top: 90px; }
+  @media (max-width: 900px) { .show-row { grid-template-columns: 1fr; gap: 32px; } .show-row.rev .show-copy { order: -1; } }
+  .show-copy h3 { font-size: clamp(24px, 3.4vw, 34px); font-weight: 800; }
+  .show-copy p { margin-top: 14px; color: var(--fg-muted); font-size: 17px; }
+  .show-copy ul { margin: 20px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 11px; }
+  .show-copy li { display: flex; gap: 11px; align-items: flex-start; font-weight: 500; }
+  .show-copy li svg { color: var(--emerald); flex: none; margin-top: 3px; }
+  .tilt { transform: perspective(1400px) rotateY(-6deg) rotateX(2deg); }
+  .tilt.r { transform: perspective(1400px) rotateY(6deg) rotateX(2deg); }
+
+  /* Security */
+  .sec-band {
+    background:
+      radial-gradient(800px 400px at 80% 10%, rgba(124,58,237,.5), transparent 60%),
+      linear-gradient(160deg, var(--violet-950), #150e2c);
+    color: #fff; padding: 100px 0; overflow: hidden;
+  }
+  .sec-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; }
+  @media (max-width: 900px) { .sec-grid { grid-template-columns: 1fr; } }
+  .sec-grid h2 { font-size: clamp(30px, 4.4vw, 44px); font-weight: 800; }
+  .sec-grid p { margin-top: 18px; color: #cfc7ec; font-size: 18px; }
+  .lock-list { margin-top: 26px; display: flex; flex-direction: column; gap: 14px; }
+  .lock-list div { display: flex; gap: 13px; align-items: flex-start; }
+  .lock-list .k { width: 40px; height: 40px; border-radius: 11px; background: rgba(255,255,255,.1); display: grid; place-items: center; color: #a78bfa; flex: none; }
+  .lock-list b { font-weight: 700; }
+  .lock-list span { color: #bcb2df; font-size: 14px; }
+  .shield-viz { display: grid; place-items: center; }
+  .shield-viz .halo { width: 260px; height: 260px; border-radius: 50%; display: grid; place-items: center;
+    background: radial-gradient(circle, rgba(139,92,246,.4), transparent 65%); animation: pulse 3.5s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { transform: scale(1); opacity: .9; } 50% { transform: scale(1.08); opacity: 1; } }
+
+  /* Comparison */
+  .cmp { max-width: 760px; margin: 0 auto; border: 1px solid var(--border); border-radius: 20px; overflow: hidden; background: var(--card); }
+  .cmp-row { display: grid; grid-template-columns: 1.4fr 1fr 1fr; }
+  .cmp-row > div { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; font-size: 15px; }
+  .cmp-row:last-child > div { border-bottom: 0; }
+  .cmp-head > div { font-weight: 800; font-size: 14px; text-transform: uppercase; letter-spacing: .04em; }
+  .cmp-head .us { color: var(--violet-600); }
+  .cmp-row .us { background: color-mix(in srgb, var(--violet-500) 8%, transparent); font-weight: 700; }
+  .cmp-row .lbl { color: var(--fg-muted); }
+  .yes { color: var(--emerald); } .no { color: #c05575; }
+  @media (prefers-color-scheme: dark) { .cmp-head .us, .cmp-row .us b { color: var(--violet-300); } }
+
+  /* FAQ */
+  .faq { max-width: 780px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+  .qa { border: 1px solid var(--border); border-radius: 14px; background: var(--card); overflow: hidden; }
+  .qa summary { list-style: none; cursor: pointer; padding: 20px 22px; font-weight: 700; font-size: 17px; display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+  .qa summary::-webkit-details-marker { display: none; }
+  .qa summary .chev { transition: transform .25s; color: var(--violet-500); flex: none; }
+  .qa[open] summary .chev { transform: rotate(45deg); }
+  .qa .a { padding: 0 22px 20px; color: var(--fg-muted); font-size: 16px; }
+
+  /* Pricing */
+  .price-card {
+    max-width: 480px; margin: 0 auto; text-align: center; padding: 44px 36px; border-radius: 24px;
+    background: var(--card); border: 1px solid var(--border); position: relative;
+    box-shadow: 0 40px 90px -50px rgba(124,58,237,.6);
+  }
+  .price-card .tag { display: inline-block; background: var(--violet-100); color: var(--violet-700); font-weight: 700; font-size: 13px; padding: 6px 14px; border-radius: 999px; }
+  @media (prefers-color-scheme: dark) { .price-card .tag { background: rgba(124,58,237,.2); color: var(--violet-300); } }
+  .price-card .amount { font-size: 58px; font-weight: 800; letter-spacing: -0.03em; margin: 14px 0 2px; }
+  .price-card .amount small { font-size: 20px; font-weight: 600; color: var(--fg-muted); }
+  .price-card .once { color: var(--fg-muted); font-weight: 600; }
+  .price-list { text-align: left; margin: 26px 0; display: flex; flex-direction: column; gap: 12px; }
+  .price-list div { display: flex; gap: 11px; align-items: flex-start; }
+  .price-list svg { color: var(--emerald); flex: none; margin-top: 3px; }
+
+  /* Final CTA */
+  .final { text-align: center; padding: 110px 0; position: relative; overflow: hidden;
+    background: radial-gradient(700px 380px at 50% 0%, rgba(124,58,237,.22), transparent 60%); }
+  .final h2 { font-size: clamp(32px, 5vw, 52px); font-weight: 800; }
+  .final p { margin: 18px auto 0; max-width: 46ch; color: var(--fg-muted); font-size: 19px; }
+
+  footer { border-top: 1px solid var(--border); padding: 48px 0; color: var(--fg-muted); font-size: 14px; }
+  .foot-in { display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap; align-items: center; }
+  .foot-note { max-width: 620px; font-size: 13px; line-height: 1.6; }
+
+  /* Reveal animation */
+  .reveal { opacity: 0; transform: translateY(28px); transition: opacity .7s cubic-bezier(.2,.7,.2,1), transform .7s cubic-bezier(.2,.7,.2,1); }
+  .reveal.in { opacity: 1; transform: none; }
+  .hero .reveal { transition-duration: .8s; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal { opacity: 1 !important; transform: none !important; transition: none; }
+    .orb, .halo { animation: none !important; }
+    * { scroll-behavior: auto !important; }
+  }
+  html { scroll-behavior: smooth; }
+
+  /* ---------- Responsivo (mobile) ---------- */
+  .cta-short { display: none; }
+
+  @media (max-width: 760px) {
+    .wrap { padding: 0 18px; }
+    .band { padding: 60px 0; }
+    .sec-band, .final { padding: 64px 0; }
+    .hero { padding: 54px 0 66px; }
+
+    .nav-in { height: 60px; }
+    .brand { font-size: 17px; }
+    .brand-mark { width: 32px; height: 32px; }
+    .nav-cta { padding: 9px 15px !important; font-size: 13px !important; }
+    .cta-long { display: none; }
+    .cta-short { display: inline; }
+
+    .hero h1 { font-size: clamp(28px, 8.4vw, 40px); overflow-wrap: break-word; }
+    .hero-sub { font-size: 16px; margin-top: 16px; max-width: none; }
+    .hero-cta { margin-top: 26px; }
+    .hero-cta .btn { flex: 1 1 auto; justify-content: center; }
+    .hero-trust { gap: 12px 20px; }
+
+    /* Remove a inclinação 3D no mobile (evita corte lateral) */
+    .tilt, .tilt.r { transform: none !important; }
+
+    .sec-head { margin-bottom: 40px; }
+    .sec-head h2 { font-size: clamp(24px, 6.8vw, 34px); }
+    .sec-head p { font-size: 16px; }
+
+    .pain { padding: 22px; }
+    .show-row + .show-row { margin-top: 54px; }
+    .show-copy h3 { font-size: 24px; }
+    .show-copy p { font-size: 16px; }
+
+    .sec-grid h2 { font-size: clamp(24px, 6.8vw, 34px); }
+    .sec-grid p { font-size: 16px; }
+    .shield-viz { display: none; }
+
+    .final h2 { font-size: clamp(26px, 8.2vw, 38px); }
+    .final p { font-size: 17px; }
+    .price-card { padding: 32px 22px; }
+
+    .cmp-row { grid-template-columns: 1.2fr 1fr 1fr; }
+    .cmp-row > div { padding: 12px 12px; font-size: 13px; }
+
+    /* Mockup do app mais compacto */
+    .app-main { padding: 15px; }
+    .stat { padding: 11px; }
+    .stat .val { font-size: 18px; }
+    .stat .val.sm { font-size: 15px; }
+  }
+
+  /* Celulares estreitos: mockup vira "só o conteúdo" (sem barra lateral) */
+  @media (max-width: 430px) {
+    .app { grid-template-columns: 1fr; }
+    .app-side { display: none; }
+  }
+</style>
+
+<div class="lp">
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="wrap nav-in">
+      <div class="brand">
+        <span class="brand-mark">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 3l7 2.5v5.5c0 4.2-3 7-7 8.5-4-1.5-7-4.3-7-8.5V5.5L12 3z" fill="#fff"/><path d="M8.5 12l2.3 2.3L15.5 9.5" stroke="#7c3aed" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        PsicoHub
+      </div>
+      <div class="nav-links">
+        <a class="muted" href="#recursos">Recursos</a>
+        <a class="muted" href="#seguranca">Segurança</a>
+        <a class="muted" href="#planos">Oferta</a>
+        <a class="btn btn-primary nav-cta" href="https://wa.me/5511961998900?text=Ol%C3%A1%21%20Quero%20saber%20mais%20sobre%20o%20PsicoHub." target="_blank" rel="noopener" style="padding:11px 20px;font-size:15px;"><span class="cta-long">Quero organizar minha clínica</span><span class="cta-short">Quero o app</span></a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <header class="hero">
+    <span class="orb orb1"></span><span class="orb orb2"></span><span class="orb orb3"></span>
+    <div class="wrap hero-grid">
+      <div>
+        <span class="pill reveal"><span class="dot"></span> 100% offline · seus dados nunca saem do seu computador</span>
+        <h1 class="reveal" style="transition-delay:.05s">
+          Toda a sua clínica<br><span class="light">em um só lugar.</span><br>
+          <span class="grad-text">Sem mensalidade. Sem nuvem.</span>
+        </h1>
+        <p class="hero-sub reveal" style="transition-delay:.12s">
+          Prontuário, agenda e financeiro num app que roda direto no seu computador —
+          com tudo <span class="serif-accent" style="color:#e9e3ff">criptografado</span> e protegido pelo seu sigilo profissional.
+          Você cuida das pessoas; o PsicoHub cuida da papelada.
+        </p>
+        <div class="hero-cta reveal" style="transition-delay:.18s">
+          <a class="btn btn-primary" href="https://wa.me/5511961998900?text=Ol%C3%A1%21%20Quero%20saber%20mais%20sobre%20o%20PsicoHub." target="_blank" rel="noopener">Começar agora</a>
+          <a class="btn btn-ghost" href="#recursos">Ver como funciona</a>
+        </div>
+        <div class="hero-trust reveal" style="transition-delay:.24s">
+          <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 3l7 2.5v5.5c0 4.2-3 7-7 8.5-4-1.5-7-4.3-7-8.5V5.5L12 3z" stroke="currentColor" stroke-width="1.6"/><path d="M9 12l2 2 4-4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Criptografia AES-256</span>
+          <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Windows e Mac</span>
+          <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M8 12l3 3 5-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Pagamento único</span>
+        </div>
+      </div>
+
+      <!-- HERO MOCKUP: Dashboard -->
+      <div class="reveal" style="transition-delay:.2s">
+        <div class="window tilt">
+          <div class="window-bar"><span class="d d1"></span><span class="d d2"></span><span class="d d3"></span><span class="u">PsicoHub Desktop</span></div>
+          <div class="app">
+            <aside class="app-side">
+              <div class="app-logo"><span class="m"><svg width="15" height="15" viewBox="0 0 24 24"><path d="M12 3l7 2.5v5.5c0 4.2-3 7-7 8.5-4-1.5-7-4.3-7-8.5V5.5L12 3z" fill="#fff"/><path d="M8.5 12l2.3 2.3L15.5 9.5" stroke="#7c3aed" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>PsicoHub</div>
+              <div class="app-nav active"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/></svg>Dashboard</div>
+              <div class="app-nav"><svg viewBox="0 0 24 24" fill="none"><circle cx="9" cy="8" r="3" stroke="currentColor" stroke-width="2"/><path d="M4 20c0-3 2.5-5 5-5s5 2 5 5" stroke="currentColor" stroke-width="2"/></svg>Pacientes</div>
+              <div class="app-nav"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="2"/><path d="M3 9h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="2"/></svg>Agenda</div>
+              <div class="app-nav"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="12" rx="2" stroke="currentColor" stroke-width="2"/><path d="M3 10h18" stroke="currentColor" stroke-width="2"/></svg>Financeiro</div>
+              <div class="app-nav"><svg viewBox="0 0 24 24" fill="none"><path d="M6 3h9l4 4v14H6z" stroke="currentColor" stroke-width="2"/><path d="M14 3v5h5" stroke="currentColor" stroke-width="2"/></svg>Documentos</div>
+            </aside>
+            <main class="app-main">
+              <div class="app-date">quarta-feira, 22 de julho</div>
+              <div class="app-h">Bom trabalho hoje 👋</div>
+              <div class="stat-grid">
+                <div class="stat"><span class="ic"><svg viewBox="0 0 24 24" fill="none"><circle cx="9" cy="8" r="3" stroke="currentColor" stroke-width="2"/><path d="M4 20c0-3 2.5-5 5-5s5 2 5 5" stroke="currentColor" stroke-width="2"/></svg></span><div><div class="lbl">Pacientes ativos</div><div class="val">42</div></div></div>
+                <div class="stat"><span class="ic"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="2"/><path d="M3 9h18" stroke="currentColor" stroke-width="2"/></svg></span><div><div class="lbl">Agendamentos hoje</div><div class="val">6</div></div></div>
+                <div class="stat"><span class="ic"><svg viewBox="0 0 24 24" fill="none"><path d="M3 7h18v10H3z" stroke="currentColor" stroke-width="2"/><path d="M16 12h2" stroke="currentColor" stroke-width="2"/></svg></span><div><div class="lbl">Recebido no mês</div><div class="val sm">R$ 3.800</div></div></div>
+                <div class="stat"><span class="ic"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="2"/></svg></span><div><div class="lbl">A receber</div><div class="val sm">R$ 750</div></div></div>
+              </div>
+              <div class="card-lite" style="margin-top:12px">
+                <div style="font-weight:800;margin-bottom:4px">Pacientes recentes</div>
+                <div class="row-item"><span class="avatar">A</span><div style="flex:1"><div style="font-weight:600">Ana Carolina Ribeiro</div><div style="color:var(--app-muted-fg);font-size:11px">(11) 98765-4321</div></div></div>
+                <div class="row-item"><span class="avatar">B</span><div style="flex:1"><div style="font-weight:600">Bruno Almeida Costa</div><div style="color:var(--app-muted-fg);font-size:11px">(11) 99876-1234</div></div></div>
+              </div>
+            </main>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- PAIN (PAS) -->
+  <section class="band">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <span class="eyebrow">Você reconhece isso?</span>
+        <h2>A clínica funciona. Mas a organização vive te consumindo.</h2>
+        <p>Se você já se sentiu assim, o problema não é você — é a ferramenta errada (ou a falta dela).</p>
+      </div>
+      <div class="pain-grid">
+        <div class="pain reveal">
+          <div class="ix"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M6 3h9l4 4v14H6z" stroke="currentColor" stroke-width="2"/><path d="M9 12h6M9 16h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+          <h3>Prontuários espalhados</h3>
+          <p>Cadernos, arquivos no Word, blocos de notas… e quando você precisa da evolução da última sessão, some. A história do paciente vive em pedaços.</p>
+        </div>
+        <div class="pain reveal" style="transition-delay:.08s">
+          <div class="ix"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M3 7h18v10H3z" stroke="currentColor" stroke-width="2"/><path d="M3 11h18" stroke="currentColor" stroke-width="2"/></svg></div>
+          <h3>Pagamentos que escapam</h3>
+          <p>Fim do mês, e você descobre que esqueceu de cobrar três pacientes. Sem controle, o dinheiro que você já trabalhou simplesmente evapora.</p>
+        </div>
+        <div class="pain reveal" style="transition-delay:.16s">
+          <div class="ix"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 10V7a4 4 0 018 0v3" stroke="currentColor" stroke-width="2"/></svg></div>
+          <h3>Medo pelo sigilo</h3>
+          <p>Aquele friozinho ao imaginar dados sensíveis de pacientes numa nuvem qualquer, sujeita a vazamentos — bem o oposto do sigilo que a profissão exige.</p>
+        </div>
+        <div class="pain reveal">
+          <div class="ix"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+          <h3>Mensalidade que pesa</h3>
+          <p>Sistemas cobram todo mês, inclusive nos meses mais fracos. No fim do ano, é uma conta alta por algo que deveria só te ajudar.</p>
+        </div>
+        <div class="pain reveal" style="transition-delay:.08s">
+          <div class="ix"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 12a8 8 0 018-8M20 12a8 8 0 01-8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M3 3l18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+          <h3>Refém da internet</h3>
+          <p>Caiu a conexão, travou o sistema — e lá se foi o registro da sessão. Ferramenta boa não pode depender de um sinal de Wi-Fi.</p>
+        </div>
+        <div class="pain reveal" style="transition-delay:.16s">
+          <div class="ix"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 3v18M5 8l7-5 7 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <h3>Tempo demais na burocracia</h3>
+          <p>Cada relatório, recibo e declaração feito na mão rouba minutos preciosos — tempo que deveria ser das pessoas que você cuida.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SOLUTION INTRO + FEATURES -->
+  <section class="band soft" id="recursos">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <span class="eyebrow">Conheça o PsicoHub</span>
+        <h2>Um só lugar para <span class="grad-text">cuidar da clínica inteira</span></h2>
+        <p>Do primeiro contato à alta: prontuário, agenda, dinheiro e documentos conversando entre si — simples, rápido e no seu controle.</p>
+      </div>
+      <div class="feat-grid">
+        <div class="feat reveal"><div class="fi"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M6 3h9l4 4v14H6z" stroke="#fff" stroke-width="2"/><path d="M9 12h6M9 16h4" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></div><h3>Prontuário eletrônico</h3><p>Anamnese, sessões, evolução, humor, plano e tarefas — a história completa em linha do tempo.</p></div>
+        <div class="feat reveal" style="transition-delay:.05s"><div class="fi"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="16" rx="2" stroke="#fff" stroke-width="2"/><path d="M3 9h18M8 3v4M16 3v4" stroke="#fff" stroke-width="2"/></svg></div><h3>Agenda visual</h3><p>Semana inteira à vista, por paciente e modalidade, com status de cada sessão.</p></div>
+        <div class="feat reveal" style="transition-delay:.1s"><div class="fi"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="12" rx="2" stroke="#fff" stroke-width="2"/><path d="M3 10h18" stroke="#fff" stroke-width="2"/></svg></div><h3>Financeiro</h3><p>Lançamentos, formas de pagamento e totais do mês. Nunca mais esqueça de cobrar.</p></div>
+        <div class="feat reveal" style="transition-delay:.15s"><div class="fi"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M6 3h9l4 4v14H6z" stroke="#fff" stroke-width="2"/><path d="M14 3v5h5" stroke="#fff" stroke-width="2"/></svg></div><h3>Documentos em PDF</h3><p>Recibo, declaração, contrato e consentimento gerados em segundos, prontos para imprimir.</p></div>
+        <div class="feat reveal"><div class="fi"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 18V9M10 18V5M16 18v-6M22 18H2" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></div><h3>Escalas psicológicas</h3><p>PHQ-9 e GAD-7 com pontuação e gravidade automáticas para acompanhar a evolução.</p></div>
+        <div class="feat reveal" style="transition-delay:.05s"><div class="fi"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 18V9M10 18V5M16 18v-6" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></div><h3>Relatórios</h3><p>Receita por mês, pacientes ativos, faltas e cancelamentos num piscar de olhos.</p></div>
+        <div class="feat reveal" style="transition-delay:.1s"><div class="fi"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#fff" stroke-width="2"/><path d="M20 20l-3.5-3.5" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></div><h3>Busca global</h3><p>Ache qualquer paciente, sessão ou lançamento por nome, CPF ou diagnóstico.</p></div>
+        <div class="feat reveal" style="transition-delay:.15s"><div class="fi"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 3v12M8 11l4 4 4-4" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 19h16" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></div><h3>Backup criptografado</h3><p>Exporte tudo para pendrive, HD ou nuvem escolhida por você — protegido por senha.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SHOWCASE ROWS -->
+  <section class="band">
+    <div class="wrap">
+      <!-- Prontuário -->
+      <div class="show-row">
+        <div class="reveal">
+          <div class="window tilt">
+            <div class="window-bar"><span class="d d1"></span><span class="d d2"></span><span class="d d3"></span><span class="u">Prontuário — Ana Carolina Ribeiro</span></div>
+            <div style="background:var(--app-bg);color:var(--app-fg);padding:18px;font-size:13px">
+              <div style="display:flex;gap:11px;align-items:center;margin-bottom:14px">
+                <span class="avatar" style="width:40px;height:40px;font-size:16px">A</span>
+                <div><div style="font-weight:800;font-size:16px">Ana Carolina Ribeiro</div><div style="color:var(--app-muted-fg);font-size:11px">34 anos · Arquiteta</div></div>
+              </div>
+              <div style="font-weight:800;margin-bottom:10px">Prontuário</div>
+              <div class="tl">
+                <div class="tl-item"><span class="tl-badge">Sessão</span><span style="color:var(--app-muted-fg);font-size:10px;float:right">22 jul</span><p style="margin-top:7px;color:#475569">Relatou melhora significativa no sono após as técnicas de higiene do sono. Reduziu a ruminação noturna.</p></div>
+                <div class="tl-item"><span class="tl-badge">Sessão</span><span style="color:var(--app-muted-fg);font-size:10px;float:right">08 jul</span><p style="margin-top:7px;color:#475569">Trabalhamos crenças de perfeccionismo no trabalho. Identificou padrão de autocobrança.</p></div>
+                <div class="tl-item"><span class="tl-badge alt">Anamnese</span><span style="color:var(--app-muted-fg);font-size:10px;float:right">12 jun</span><p style="margin-top:7px;color:#475569">Queixa principal: ansiedade e insônia há 8 meses. Iniciar acompanhamento quinzenal.</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="show-copy reveal" style="transition-delay:.1s">
+          <span class="eyebrow">Prontuário</span>
+          <h3 style="margin-top:12px">A história completa de cada paciente, em segundos</h3>
+          <p>Abra o paciente e veja tudo em uma linha do tempo: da anamnese à alta. Registre humor, evolução, intervenções e tarefas sem sair da tela.</p>
+          <ul>
+            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Anamnese, sessões e alta na mesma tela</li>
+            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Campos de humor, evolução, plano e tarefas</li>
+            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Nunca mais perca o fio da última sessão</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Agenda -->
+      <div class="show-row rev">
+        <div class="show-copy reveal">
+          <span class="eyebrow">Agenda</span>
+          <h3 style="margin-top:12px">Sua semana inteira, num relance</h3>
+          <p>Agende em dois cliques, veja quem vem hoje e marque presença, falta ou cancelamento. Presencial ou online, tudo colorido e claro.</p>
+          <ul>
+            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Visão semanal com status por sessão</li>
+            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Presencial e online, cada paciente no seu lugar</li>
+            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Controle de faltas e cancelamentos</li>
+          </ul>
+        </div>
+        <div class="reveal" style="transition-delay:.1s">
+          <div class="window tilt r">
+            <div class="window-bar"><span class="d d1"></span><span class="d d2"></span><span class="d d3"></span><span class="u">Agenda · 20–26 jul</span></div>
+            <div style="background:var(--app-bg);padding:16px">
+              <div class="wk">
+                <div class="wk-col"><div class="wk-head"><div class="dow">Seg</div><div class="num">20</div></div><div class="wk-body"></div></div>
+                <div class="wk-col"><div class="wk-head"><div class="dow">Ter</div><div class="num">21</div></div><div class="wk-body"><div class="evt">10:00 · Camila</div></div></div>
+                <div class="wk-col"><div class="wk-head"><div class="dow">Qua</div><div class="num today">22</div></div><div class="wk-body"><div class="evt">09:00 · Ana Carolina</div><div class="evt green">11:00 · Bruno</div><div class="evt">15:00 · Daniel</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Financeiro -->
+      <div class="show-row">
+        <div class="reveal">
+          <div class="window tilt">
+            <div class="window-bar"><span class="d d1"></span><span class="d d2"></span><span class="d d3"></span><span class="u">Financeiro</span></div>
+            <div style="background:var(--app-bg);padding:18px;font-size:13px">
+              <div class="stat-grid" style="grid-template-columns:1fr 1fr;margin-top:0">
+                <div class="stat"><span class="ic" style="color:#0d9488"><svg viewBox="0 0 24 24" fill="none"><path d="M4 18l5-6 4 3 6-8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div><div class="lbl">Recebido no mês</div><div class="val sm">R$ 3.800,00</div></div></div>
+                <div class="stat"><span class="ic"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="2"/></svg></span><div><div class="lbl">A receber</div><div class="val sm">R$ 750,00</div></div></div>
+              </div>
+              <div class="card-lite" style="margin-top:12px">
+                <div class="row-item"><div style="flex:1"><div style="font-weight:600">Sessão 12/07</div><div style="color:var(--app-muted-fg);font-size:11px">Ana Carolina · PIX</div></div><span class="badge paid">Pago</span><span style="font-weight:800;font-variant-numeric:tabular-nums">R$ 200</span></div>
+                <div class="row-item"><div style="flex:1"><div style="font-weight:600">Sessão 10/07</div><div style="color:var(--app-muted-fg);font-size:11px">Bruno · Cartão</div></div><span class="badge paid">Pago</span><span style="font-weight:800;font-variant-numeric:tabular-nums">R$ 180</span></div>
+                <div class="row-item"><div style="flex:1"><div style="font-weight:600">Pacote mensal</div><div style="color:var(--app-muted-fg);font-size:11px">Daniel · Transferência</div></div><span class="badge pend">Pendente</span><span style="font-weight:800;font-variant-numeric:tabular-nums">R$ 600</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="show-copy reveal" style="transition-delay:.1s">
+          <span class="eyebrow">Financeiro</span>
+          <h3 style="margin-top:12px">Saiba exatamente quanto entra — e quanto falta</h3>
+          <p>Cada sessão vira um lançamento. Veja o total recebido e o que ainda está pendente no mês, com um clique para marcar como pago.</p>
+          <ul>
+            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> PIX, cartão, dinheiro ou transferência</li>
+            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Totais do mês sempre atualizados</li>
+            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Fim do "esqueci de cobrar"</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECURITY -->
+  <section class="sec-band" id="seguranca">
+    <div class="wrap sec-grid">
+      <div class="reveal">
+        <span class="eyebrow" style="color:#c4b5fd">Sigilo em primeiro lugar</span>
+        <h2 style="margin-top:14px">Seus registros nunca saem do seu computador.</h2>
+        <p>Sem servidor, sem nuvem de terceiros. Tudo fica gravado localmente e protegido por criptografia de nível militar. O sigilo que a sua profissão exige, embutido na ferramenta.</p>
+        <div class="lock-list">
+          <div><span class="k"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V7a4 4 0 018 0v3" stroke="currentColor" stroke-width="1.8"/></svg></span><div><b>Criptografia AES-256 (SQLCipher)</b><br><span>O banco inteiro é criptografado em repouso. Sem a sua senha mestra, é ilegível.</span></div></div>
+          <div><span class="k"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 12a8 8 0 018-8M20 12a8 8 0 01-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3 3l18 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><div><b>100% offline</b><br><span>Nenhum dado é enviado para a internet. Funciona mesmo sem conexão.</span></div></div>
+          <div><span class="k"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span><div><b>Senha mestra + bloqueio automático</b><br><span>Só você entra. E o app se tranca sozinho após inatividade.</span></div></div>
+        </div>
+      </div>
+      <div class="shield-viz reveal" style="transition-delay:.1s">
+        <div class="halo">
+          <svg width="150" height="150" viewBox="0 0 24 24" fill="none"><path d="M12 2.5l8 2.8v6c0 4.7-3.4 7.9-8 9.7-4.6-1.8-8-5-8-9.7v-6L12 2.5z" fill="url(#g)"/><path d="M8.3 12l2.6 2.6L15.9 9.4" stroke="#7c3aed" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="g" x1="4" y1="2" x2="20" y2="22" gradientUnits="userSpaceOnUse"><stop stop-color="#fff"/><stop offset="1" stop-color="#ede9fe"/></linearGradient></defs></svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMPARISON -->
+  <section class="band soft">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <span class="eyebrow">Por que o PsicoHub</span>
+        <h2>Diferente de tudo que te ofereceram</h2>
+      </div>
+      <div class="cmp reveal">
+        <div class="cmp-row cmp-head"><div class="lbl" style="color:var(--fg-muted)">&nbsp;</div><div>Outros sistemas</div><div class="us">PsicoHub</div></div>
+        <div class="cmp-row"><div class="lbl">Custo</div><div class="no">Mensalidade eterna</div><div class="us"><b>Pagamento único</b></div></div>
+        <div class="cmp-row"><div class="lbl">Onde ficam os dados</div><div class="no">Nuvem de terceiros</div><div class="us"><b>Só no seu PC</b></div></div>
+        <div class="cmp-row"><div class="lbl">Funciona sem internet</div><div class="no">Não</div><div class="us"><b>Sempre</b></div></div>
+        <div class="cmp-row"><div class="lbl">Criptografia dos dados</div><div class="lbl">Varia</div><div class="us"><b>AES-256 local</b></div></div>
+        <div class="cmp-row"><div class="lbl">Instalação</div><div class="lbl">Cadastro e login</div><div class="us"><b>Instalou, abriu, usou</b></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="band">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <span class="eyebrow">Dúvidas frequentes</span>
+        <h2>Tudo que você precisa saber</h2>
+      </div>
+      <div class="faq">
+        <details class="qa reveal"><summary>Preciso de internet para usar? <span class="chev"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span></summary><div class="a">Não. O PsicoHub funciona 100% offline, direto no seu computador. A internet só é necessária se você quiser salvar um backup em algum serviço de nuvem — e mesmo assim, o arquivo vai criptografado.</div></details>
+        <details class="qa reveal"><summary>Onde ficam os dados dos meus pacientes? <span class="chev"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span></summary><div class="a">Apenas no seu computador, num banco de dados criptografado com AES-256. Nada é enviado para servidores nossos ou de terceiros. Só você, com a sua senha mestra, tem acesso.</div></details>
+        <details class="qa reveal"><summary>Funciona no Windows e no Mac? <span class="chev"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span></summary><div class="a">Sim. Há um instalador para Windows e outro para Mac. Você baixa o do seu sistema, instala e começa a usar.</div></details>
+        <details class="qa reveal"><summary>E se eu trocar de computador? <span class="chev"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span></summary><div class="a">Simples: você exporta um backup criptografado (para pendrive, HD ou nuvem), instala o app no computador novo e restaura o backup com a sua senha. Seus dados voltam intactos.</div></details>
+        <details class="qa reveal"><summary>Tem mensalidade? <span class="chev"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span></summary><div class="a">Não. É pagamento único. Você instala e o programa é seu para usar, sem cobranças recorrentes.</div></details>
+        <details class="qa reveal"><summary>É difícil de usar? <span class="chev"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span></summary><div class="a">Foi pensado para ser simples: você abre, cria sua senha e em poucos cliques já cadastra um paciente e registra uma sessão. Sem manual, sem curva de aprendizado.</div></details>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section class="band soft" id="planos">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <span class="eyebrow">Oferta</span>
+        <h2>Pague uma vez. Use para sempre.</h2>
+        <p>Sem mensalidade e sem cobrança recorrente. Fale com a gente no WhatsApp e garanta o seu acesso.</p>
+      </div>
+      <div class="price-card reveal">
+        <span class="tag">Licença vitalícia</span>
+        <h3 style="font-size:27px;font-weight:800;letter-spacing:-.02em;margin:16px 0 6px">Tudo o que a sua clínica precisa</h3>
+        <div class="once">pagamento único · sem mensalidade</div>
+        <div class="price-list">
+          <div><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Todos os módulos: prontuário, agenda, financeiro, documentos, escalas e relatórios</div>
+          <div><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Pacientes ilimitados, criptografia AES-256</div>
+          <div><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Instalador para Windows e Mac</div>
+          <div><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Backup e restauração inclusos</div>
+        </div>
+        <a class="btn btn-primary" href="https://wa.me/5511961998900?text=Ol%C3%A1%21%20Quero%20saber%20mais%20sobre%20o%20PsicoHub." target="_blank" rel="noopener" style="width:100%">Quero o PsicoHub agora</a>
+        <p style="margin-top:14px;font-size:13px;color:var(--fg-muted)">Instalação simples · seus dados 100% no seu computador</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="final">
+    <div class="wrap reveal">
+      <h2>Menos papelada.<br><span class="grad-text">Mais presença com quem importa.</span></h2>
+      <p>Organize a sua clínica, proteja o sigilo dos seus pacientes e recupere o seu tempo — tudo num app que é só seu.</p>
+      <div style="margin-top:34px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap">
+        <a class="btn btn-primary" href="https://wa.me/5511961998900?text=Ol%C3%A1%21%20Quero%20saber%20mais%20sobre%20o%20PsicoHub." target="_blank" rel="noopener">Começar agora</a>
+        <a class="btn btn-light" href="#recursos">Ver os recursos</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap foot-in">
+      <div>
+        <div class="brand" style="font-size:18px;margin-bottom:10px"><span class="brand-mark" style="width:32px;height:32px"><svg width="19" height="19" viewBox="0 0 24 24"><path d="M12 3l7 2.5v5.5c0 4.2-3 7-7 8.5-4-1.5-7-4.3-7-8.5V5.5L12 3z" fill="#fff"/><path d="M8.5 12l2.3 2.3L15.5 9.5" stroke="#7c3aed" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>PsicoHub</div>
+        <p class="foot-note">Software de prontuário e gestão para psicólogas e psicólogos. Offline, criptografado e sem mensalidade.</p>
+      </div>
+      <div class="foot-note" style="text-align:right;opacity:.8">© 2026 PsicoHub<br>Todos os dados ficam no computador do profissional.</div>
+    </div>
+  </footer>
+</div>
+
+<script>
+  (function () {
+    var reveals = document.querySelectorAll('.reveal');
+    function revealAll() { reveals.forEach(function (el) { el.classList.add('in'); }); }
+
+    if (!('IntersectionObserver' in window)) { revealAll(); }
+    else {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+      reveals.forEach(function (el) { io.observe(el); });
+      // Rede de segurança: nunca deixar conteúdo invisível.
+      setTimeout(revealAll, 2500);
+    }
+
+    // FAQ: fecha os outros ao abrir um (acordeão)
+    var qs = document.querySelectorAll('.qa');
+    qs.forEach(function (d) {
+      d.addEventListener('toggle', function () {
+        if (d.open) qs.forEach(function (o) { if (o !== d) o.open = false; });
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>
